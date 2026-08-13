@@ -1,11 +1,21 @@
 from fastapi import APIRouter       # nos permite criar um "grupo de rotas".
 from fastapi import HTTPException
 from pydantic import ValidationError
+from fastapi.responses import FileResponse
+from pathlib import Path
 
-from app.schemas.indicatorVerification import IndicatorRequest      # Validação do dado digitado pelo usuário e definição do tipo
+from app.schemas.indicatorRequest import IndicatorRequest      # Validação do dado digitado pelo usuário e definição do tipo
 from app.services.otx import consultar_indicador        # Consulta o indicador na api AlienWare OTX
+from app.services.indicatorMapper import transformar_resposta_otx
 
 router = APIRouter()
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+@router.get("/indicators")
+def pagina_indicators():
+    return FileResponse(BASE_DIR / "templates" / "index.html")
+
 
 @router.get("/indicators/{indicator}")
 def receber_parametros(indicator: str):
@@ -23,13 +33,15 @@ def receber_parametros(indicator: str):
             )
     
     try:
-        resultado = consultar_indicador(
+        resultado_otx = consultar_indicador(
             dados.tipo,
             dados.indicator
         )
 
-        return resultado
+        resultado = transformar_resposta_otx(resultado_otx)
 
+        return resultado
+    
     except RuntimeError as erro:
 
         raise HTTPException(
