@@ -17,6 +17,11 @@ class MalwareFamilyResponse(BaseModel):
     display_name: str
     target: str | None = None
 
+class AttackResponse(BaseModel):
+    id: str
+    name: str
+    display_name: str
+
 class PulseResponse(BaseModel):
     id: str                              # Identificador único do Pulse
     name: str                            # Nome/título do Pulse

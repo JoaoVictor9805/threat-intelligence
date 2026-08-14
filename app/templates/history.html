@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Histórico de Consultas</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/history.css"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- =========================
+         HEADER
+    ========================== -->
+
+    <header class="header">
+
+        <div>
+
+            <h1>
+                Histórico de Consultas
+            </h1>
+
+            <p>
+                Histórico das consultas realizadas nos últimos 30 dias
+            </p>
+
+        </div>
+
+
+        <a
+            href="/indicators"
+            class="back-button"
+        >
+            Voltar
+        </a>
+
+    </header>
+
+
+    <!-- =========================
+         HISTÓRICO
+    ========================== -->
+
+    <main>
+
+        <section class="section">
+
+            <div class="history-card">
+
+                <div class="history-header">
+
+                    <h2 class="section-title">
+                        Consultas realizadas
+                    </h2>
+
+                    <span
+                        id="history-count"
+                        class="item-count"
+                    >
+                        {{ consultas|length }}
+                    </span>
+
+                </div>
+
+
+                {% if consultas %}
+
+                    <div
+                        id="consulta-list"
+                        class="consulta-list"
+                    >
+
+                        {% for consulta in consultas %}
+
+                            <div
+                                class="consulta"
+                                data-index="{{ loop.index0 }}"
+                            >
+
+                                <div class="consulta-content">
+
+                                    <div class="consulta-indicator">
+                                        {{ consulta.indicador }}
+                                    </div>
+
+
+                                    <div class="consulta-info">
+
+                                        <div class="info-item">
+
+                                            <span class="info-label">
+                                                Tipo
+                                            </span>
+
+                                            <span class="info-value">
+                                                {{ consulta.tipo }}
+                                            </span>
+
+                                        </div>
+
+
+                                        <div class="info-item">
+
+                                            <span class="info-label">
+                                                Fonte
+                                            </span>
+
+                                            <span class="info-value">
+                                                {{ consulta.fonte }}
+                                            </span>
+
+                                        </div>
+
+
+                                        <div class="info-item">
+
+                                            <span class="info-label">
+                                                Data
+                                            </span>
+
+                                            <span class="info-value">
+                                                {{ consulta.dataConsulta }}
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="consulta-action">
+
+                                    <a
+                                        href="/history/details/{{ consulta.id }}"
+                                        class="view-button"
+                                    >
+                                        Visualizar
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <!-- =========================
+                         VER MAIS
+                    ========================== -->
+
+                    <button
+                        id="show-more"
+                        class="show-more"
+                        type="button"
+                    >
+                        Ver mais
+                    </button>
+
+
+                {% else %}
+
+                    <div class="empty">
+
+                        Nenhuma consulta realizada nos últimos 30 dias.
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script src="/static/js/history.js"></script>
+
+</body>
+
+</html>

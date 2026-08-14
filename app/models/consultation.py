@@ -4,6 +4,8 @@ from sqlalchemy import DateTime;
 from datetime import datetime;
 from sqlalchemy import JSON;
 from sqlalchemy.dialects.mysql import INTEGER
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, func
 
 class Base(DeclarativeBase): # Classe dentro do projeto que serve como intermediária; Aqui poderíamos alterar padrões para todos nossos models/classes específicas ao mesmo tempo 
     pass
@@ -23,8 +25,8 @@ class Consultation(Base):
     )
 
     tipo: Mapped[str] = mapped_column(
-    Enum("ip", "dominio", "hash"),
-    nullable=False
+        Enum("ip", "dominio", "hash"),
+        nullable=False
     )
 
     fonte: Mapped[str] = mapped_column(

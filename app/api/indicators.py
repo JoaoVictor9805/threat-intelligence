@@ -8,6 +8,9 @@ from app.schemas.indicatorRequest import IndicatorRequest      # Validação do 
 from app.services.otx import consultar_indicador        # Consulta o indicador na api AlienWare OTX
 from app.services.indicatorMapper import transformar_resposta_otx
 
+from app.database.connection import SessionLocal
+from app.services.historySave import salvar_consulta
+
 router = APIRouter()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,6 +42,17 @@ def receber_parametros(indicator: str):
         )
 
         resultado = transformar_resposta_otx(resultado_otx)
+
+        db = SessionLocal()
+
+        try:
+            salvar_consulta(
+            db,
+            resultado
+            )
+            
+        finally:
+            db.close()
 
         return resultado
     
