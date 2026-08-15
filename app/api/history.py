@@ -39,7 +39,10 @@ def carregar_historico(request: Request):
 
 
 @router.get("/history/details/{id}")
-def carregar_detalhes_consulta(id: int):
+def carregar_detalhes_consulta(
+    id: int,
+    request: Request
+):
 
     db = SessionLocal()
 
@@ -55,7 +58,39 @@ def carregar_detalhes_consulta(id: int):
                 detail="Consulta não encontrada."
             )
 
+        return templates.TemplateResponse(
+            request=request,
+            name="historyDetails.html",
+            context={
+                "consulta": resultado
+            }
+        )
+
+    finally:
+        db.close()
+
+
+@router.get("/history/details/{id}/data")
+def carregar_dados_detalhes_consulta(id: int):
+
+    db = SessionLocal()
+
+    try:
+
+        resultado = carregar_consulta_detalhada(
+            db,
+            id
+        )
+
+        if resultado is None:
+
+            raise HTTPException(
+                status_code=404,
+                detail="Consulta não encontrada."
+            )
+
         return resultado
 
     finally:
+
         db.close()

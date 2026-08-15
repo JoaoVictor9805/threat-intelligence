@@ -5,21 +5,33 @@ from app.schemas.indicatorResponse import (
     PulseResponse
 )
 
+
 def transformar_resposta_otx(dados: dict) -> IndicatorResponse:
 
-    # Validações
+    # ============================================================
+    # VALIDAÇÕES
+    # ============================================================
+
     validations = [
         ValidationResponse(**item)
         for item in dados.get("validation", [])
     ]
 
-    # Falsos positivos
+
+    # ============================================================
+    # FALSOS POSITIVOS
+    # ============================================================
+
     false_positives = [
         FalsePositiveResponse(**item)
         for item in dados.get("false_positive", [])
     ]
 
-    # Pulses
+
+    # ============================================================
+    # PULSES
+    # ============================================================
+
     pulses = [
         PulseResponse(
             id=pulse["id"],
@@ -36,16 +48,75 @@ def transformar_resposta_otx(dados: dict) -> IndicatorResponse:
             industries=pulse["industries"],
             tlp=pulse["TLP"]
         )
-        for pulse in dados.get("pulse_info", {}).get("pulses", [])
+        for pulse in dados.get(
+            "pulse_info",
+            {}
+        ).get(
+            "pulses",
+            []
+        )
     ]
 
-    # Resposta final
+
+    # ============================================================
+    # RESPOSTA FINAL
+    # ============================================================
+
     return IndicatorResponse(
+
+        # --------------------------------------------------------
+        # Identificação
+        # --------------------------------------------------------
+
         indicador=dados["indicator"],
+
         tipo=dados["type"],
+
+
+        # --------------------------------------------------------
+        # Reputação / ameaça
+        # --------------------------------------------------------
+
         reputacao=dados["reputation"],
-        quantidade_pulses=dados.get("pulse_info", {}).get("count", 0),
+
+        quantidade_pulses=
+            dados.get(
+                "pulse_info",
+                {}
+            ).get(
+                "count",
+                0
+            ),
+
         pulses=pulses,
+
         validation=validations,
-        false_positive=false_positives
+
+        false_positive=false_positives,
+
+
+        # --------------------------------------------------------
+        # Localização
+        # --------------------------------------------------------
+
+        pais=dados.get("country_name"),
+
+        codigo_pais=dados.get("country_code"),
+
+        continente=dados.get("continent_code"),
+
+        cidade=dados.get("city"),
+
+        regiao=dados.get("region"),
+
+        subdivisao=dados.get("subdivision"),
+
+
+        # --------------------------------------------------------
+        # Infraestrutura
+        # --------------------------------------------------------
+
+        asn=dados.get("asn"),
+
+        whois=dados.get("whois")
     )

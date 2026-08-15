@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.api.indicators import router as indicators_router      # para deixar claro no main.py que aquele router pertence aos indicadores.
 from app.api.history import router as history_router   
+from app.api.aiSummary import router as ai_summary_router
 from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
@@ -9,3 +10,4 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")    # "F
 
 app.include_router(indicators_router)                           # "FastAPI, inclua nesse aplicativo todas as rotas que estão dentro desse router."
 app.include_router(history_router)
+app.include_router(ai_summary_router)

@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Detalhes da Consulta</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/historyDetails.css">
+
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <header class="header">
+
+        <div>
+
+            <h1>
+                Threat Intelligence Dashboard
+            </h1>
+
+            <p>
+                Detalhes da consulta histórica
+            </p>
+
+        </div>
+
+
+        <a
+            href="/history"
+            class="history-button"
+        >
+            Voltar ao histórico
+        </a>
+
+    </header>
+
+
+    <!-- =====================================================
+         MENSAGEM
+    ====================================================== -->
+
+    <div
+        id="mensagem"
+        class="history-message"
+    >
+        Carregando consulta...
+    </div>
+
+
+    <!-- =====================================================
+         DASHBOARD
+    ====================================================== -->
+    <br>
+    <main id="dashboard">
+
+
+        <!-- =================================================
+             INDICADOR
+        ================================================== -->
+
+        <section class="section">
+
+            <div class="indicator-card">
+
+                <div class="indicator-label">
+                    Indicador consultado
+                </div>
+
+
+                <div
+                    id="indicator-value"
+                    class="indicator-value"
+                >
+                    -
+                </div>
+
+
+                <span
+                    id="indicator-type"
+                    class="indicator-type"
+                >
+                    -
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             KPIs
+        ================================================== -->
+
+        <section class="section">
+
+            <div class="kpi-grid">
+
+
+                <div class="kpi">
+
+                    <div class="kpi-label">
+                        Reputação OTX
+                    </div>
+
+                    <div
+                        id="reputacao"
+                        class="kpi-value"
+                    >
+                        -
+                    </div>
+
+                    <div class="kpi-description">
+                        Classificação de ameaça baseada
+                        nos dados de reputação do OTX
+                    </div>
+
+                </div>
+
+
+                <div class="kpi">
+
+                    <div class="kpi-label">
+                        Pulses relacionados
+                    </div>
+
+                    <div
+                        id="quantidade-pulses"
+                        class="kpi-value"
+                    >
+                        -
+                    </div>
+
+                    <div class="kpi-description">
+                        Pulses associados ao indicador
+                    </div>
+
+                </div>
+
+
+                <div class="kpi">
+
+                    <div class="kpi-label">
+                        Validações
+                    </div>
+
+                    <div
+                        id="quantidade-validation"
+                        class="kpi-value"
+                    >
+                        -
+                    </div>
+
+                    <div class="kpi-description">
+                        Alertas e validações encontrados
+                    </div>
+
+                </div>
+
+
+                <div class="kpi">
+
+                    <div class="kpi-label">
+                        Falsos positivos
+                    </div>
+
+                    <div
+                        id="quantidade-false-positive"
+                        class="kpi-value"
+                    >
+                        -
+                    </div>
+
+                    <div class="kpi-description">
+                        Avaliações de falso positivo
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             LOCALIZAÇÃO + INFRAESTRUTURA
+        ================================================== -->
+
+        <section class="section two-columns">
+
+
+            <div class="card">
+
+                <h2 class="section-title">
+                    Localização
+                </h2>
+
+                <div
+                    id="localizacao"
+                    class="info-list"
+                ></div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h2 class="section-title">
+                    Infraestrutura
+                </h2>
+
+                <div
+                    id="infraestrutura"
+                    class="info-list"
+                ></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             CONTEXTO DE AMEAÇA
+        ================================================== -->
+
+        <section class="section">
+
+            <h2 class="section-title">
+                Contexto de ameaça
+            </h2>
+
+
+            <div class="threat-grid">
+
+
+                <!-- MALWARE -->
+
+                <div class="threat-card">
+
+                    <div class="threat-card-header">
+
+                        <h3>
+                            Malware Families
+                        </h3>
+
+                        <span
+                            id="malware-count"
+                            class="item-count"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="malware-families"
+                        class="threat-list"
+                    ></div>
+
+
+                    <button
+                        id="show-more-malware"
+                        class="show-more threat-more"
+                        type="button"
+                    >
+                        Ver mais
+                    </button>
+
+                </div>
+
+
+                <!-- MITRE -->
+
+                <div class="threat-card">
+
+                    <div class="threat-card-header">
+
+                        <h3>
+                            MITRE ATT&CK
+                        </h3>
+
+                        <span
+                            id="attack-count"
+                            class="item-count"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="attack-ids"
+                        class="threat-list"
+                    ></div>
+
+
+                    <button
+                        id="show-more-attack"
+                        class="show-more threat-more"
+                        type="button"
+                    >
+                        Ver mais
+                    </button>
+
+                </div>
+
+
+                <!-- PAÍSES -->
+
+                <div class="threat-card">
+
+                    <div class="threat-card-header">
+
+                        <h3>
+                            Países-alvo
+                        </h3>
+
+                        <span
+                            id="countries-count"
+                            class="item-count"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="targeted-countries"
+                        class="threat-list"
+                    ></div>
+
+
+                    <button
+                        id="show-more-countries"
+                        class="show-more threat-more"
+                        type="button"
+                    >
+                        Ver mais
+                    </button>
+
+                </div>
+
+
+                <!-- INDÚSTRIAS -->
+
+                <div class="threat-card">
+
+                    <div class="threat-card-header">
+
+                        <h3>
+                            Indústrias
+                        </h3>
+
+                        <span
+                            id="industries-count"
+                            class="item-count"
+                        >
+                            0
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        id="industries"
+                        class="threat-list"
+                    ></div>
+
+
+                    <button
+                        id="show-more-industries"
+                        class="show-more threat-more"
+                        type="button"
+                    >
+                        Ver mais
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DISTRIBUIÇÃO DA INTELIGÊNCIA
+        ================================================== -->
+
+        <section class="section">
+
+            <h2 class="section-title">
+                Distribuição da inteligência
+            </h2>
+
+
+            <div class="chart-grid">
+
+
+                <div class="chart-card">
+
+                    <h3>
+                        Malware Families
+                    </h3>
+
+                    <div class="chart-container">
+
+                        <canvas id="malware-chart"></canvas>
+
+                        <div
+                            id="malware-chart-empty"
+                            class="empty-state"
+                        >
+                            Nenhuma informação disponível.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-card">
+
+                    <h3>
+                        Países-alvo
+                    </h3>
+
+                    <div class="chart-container">
+
+                        <canvas id="countries-chart"></canvas>
+
+                        <div
+                            id="countries-chart-empty"
+                            class="empty-state"
+                        >
+                            Nenhuma informação disponível.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-card">
+
+                    <h3>
+                        Indústrias
+                    </h3>
+
+                    <div class="chart-container">
+
+                        <canvas id="industries-chart"></canvas>
+
+                        <div
+                            id="industries-chart-empty"
+                            class="empty-state"
+                        >
+                            Nenhuma informação disponível.
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-card">
+
+                    <h3>
+                        MITRE ATT&CK
+                    </h3>
+
+                    <div class="chart-container">
+
+                        <canvas id="attack-chart"></canvas>
+
+                        <div
+                            id="attack-chart-empty"
+                            class="empty-state"
+                        >
+                            Nenhuma informação disponível.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PULSES
+        ================================================== -->
+
+        <section class="section">
+
+            <h2 class="section-title">
+                Pulses relacionados
+            </h2>
+
+
+            <div class="card">
+
+                <div
+                    id="pulse-list"
+                    class="pulse-list"
+                ></div>
+
+
+                <button
+                    id="show-more-pulses"
+                    class="show-more"
+                    type="button"
+                >
+                    Ver mais
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             VALIDAÇÕES
+        ================================================== -->
+
+        <section class="section two-columns">
+
+
+            <div class="card">
+
+                <h2 class="section-title">
+                    Validações
+                </h2>
+
+                <div id="validation-list"></div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h2 class="section-title">
+                    Falsos positivos
+                </h2>
+
+                <div id="false-positive-list"></div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<script src="/static/js/historyDetails.js"></script>
+
+</body>
+
+</html>

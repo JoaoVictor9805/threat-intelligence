@@ -1,7 +1,22 @@
-const form = document.getElementById("form-consulta");
-const input = document.getElementById("indicator");
-const mensagem = document.getElementById("mensagem");
-const dashboard = document.getElementById("dashboard");
+// ============================================================
+// ID DA CONSULTA
+// ============================================================
+
+const pathParts = window.location.pathname.split("/");
+
+const consultaId =
+    pathParts[pathParts.length - 1];
+
+
+// ============================================================
+// ELEMENTOS
+// ============================================================
+
+const mensagem =
+    document.getElementById("mensagem");
+
+const dashboard =
+    document.getElementById("dashboard");
 
 
 // ============================================================
@@ -15,124 +30,249 @@ let attackChart = null;
 
 
 // ============================================================
-// PAGINAÇÃO DOS PULSES
-// ============================================================
-
-let pulses = [];
-let pulsesExibidos = 0;
-
-const PULSES_POR_PAGINA = 5;
-
-
-// ============================================================
-// PAGINAÇÃO DO CONTEXTO DE AMEAÇA
+// PAGINAÇÃO
 // ============================================================
 
 const ITEMS_POR_PAGINA = 10;
 
+const PULSES_POR_PAGINA = 5;
+
+
+let pulses = [];
+let pulsesExibidos = 0;
+
+
 let malwareFamilies = [];
 let malwareExibidos = 0;
+
 
 let attackIds = [];
 let attacksExibidos = 0;
 
+
 let targetedCountries = [];
 let countriesExibidos = 0;
+
 
 let industriesList = [];
 let industriesExibidos = 0;
 
-// ============================================================
-// Consulta à API da IA
-// ============================================================
-
-let resultadoConsulta = null;
 
 // ============================================================
-// FORMULÁRIO
+// CARREGAMENTO
 // ============================================================
 
-form.addEventListener("submit", async function(event) {
-
-    event.preventDefault();
-
-    const indicator = input.value.trim();
-
-    if (!indicator) {
-
-        mensagem.textContent = "Digite um indicador.";
-        dashboard.style.display = "none";
-
-        return;
-    }
-
-
-    mensagem.textContent = "Consultando...";
-    dashboard.style.display = "none";
-
+async function carregarConsulta() {
 
     try {
 
+        mensagem.textContent =
+            "Carregando consulta...";
+
+
         const response = await fetch(
-            `/indicators/${encodeURIComponent(indicator)}`
+            `/history/details/${consultaId}/data`
         );
-
-
-        const dados = await response.json();
 
 
         if (!response.ok) {
 
-            mensagem.textContent =
-                `Erro ${response.status}: ${
-                    dados.detail || "Erro ao realizar consulta."
-                }`;
+            const erro =
+                await response.json();
 
-            return;
+            throw new Error(
+                erro.detail ||
+                "Erro ao carregar consulta."
+            );
         }
 
 
+        const dados =
+            await response.json();
+
+
+        console.log(
+            "Dados completos do histórico:",
+            dados
+        );
+
+
+        if (!dados.resultado) {
+
+            throw new Error(
+                "O histórico não possui um campo 'resultado'."
+            );
+        }
+
+
+        /*
+         * A partir daqui, resultado possui
+         * exatamente a mesma estrutura que o
+         * index.js recebe normalmente.
+         */
+
+        const resultado =
+            dados.resultado;
+
+
+        console.log(
+            "Resultado utilizado pelo dashboard:",
+            resultado
+        );
+
+
+        console.log(
+            "Pulses:",
+            resultado.pulses
+        );
+
+
+        renderDashboard(
+            resultado,
+            dados
+        );
+
+
         mensagem.textContent =
-            "Consulta realizada com sucesso.";
+            "Consulta histórica carregada com sucesso.";
 
-        dashboard.style.display = "block";
 
-        // Guarda o resultado retornado pela OTX
-        resultadoConsulta = dados;
-
-        // Esconde um resumo anterior, caso exista
-        const aiSummary = document.getElementById("ai-summary");
-        const aiSummaryContent = document.getElementById("ai-summary-content");
-
-        aiSummary.style.display = "none";
-        aiSummaryContent.textContent = "";
-
-        const aiButton = document.getElementById("btn-ai-summary");
-
-        aiButton.disabled = false;
-        aiButton.textContent = "Gerar resumo com IA";
-
-        renderDashboard(dados);
+        dashboard.style.display =
+            "block";
 
 
     } catch (erro) {
 
-        mensagem.textContent =
-            "Erro ao conectar com o servidor.";
+        console.error(
+            "Erro ao carregar histórico:",
+            erro
+        );
 
-        console.error(erro);
+
+        mensagem.textContent =
+            erro.message ||
+            "Erro ao carregar a consulta.";
+
+
+        dashboard.style.display =
+            "none";
+
     }
 
-});
+}
+
+
+// ============================================================
+// OBTÉM RESPOSTA
+// ============================================================
+
+function obterResposta(dados) {
+
+    // ========================================================
+    // RESULTADO DA CONSULTA
+    // ========================================================
+
+    if (dados.resultado) {
+
+        if (
+            typeof dados.resultado === "string"
+        ) {
+
+            try {
+
+                return JSON.parse(
+                    dados.resultado
+                );
+
+            } catch {
+
+                return {};
+
+            }
+
+        }
+
+        return dados.resultado;
+    }
+
+
+    // ========================================================
+    // RESPOSTA
+    // ========================================================
+
+    if (dados.resposta) {
+
+        if (
+            typeof dados.resposta === "string"
+        ) {
+
+            try {
+
+                return JSON.parse(
+                    dados.resposta
+                );
+
+            } catch {
+
+                return {};
+
+            }
+
+        }
+
+        return dados.resposta;
+    }
+
+
+    // ========================================================
+    // RESPONSE
+    // ========================================================
+
+    if (dados.response) {
+
+        if (
+            typeof dados.response === "string"
+        ) {
+
+            try {
+
+                return JSON.parse(
+                    dados.response
+                );
+
+            } catch {
+
+                return {};
+
+            }
+
+        }
+
+        return dados.response;
+    }
+
+
+    // ========================================================
+    // FALLBACK
+    // ========================================================
+
+    return dados;
+}
 
 
 // ============================================================
 // DASHBOARD
 // ============================================================
 
-function renderDashboard(dados) {
+function renderDashboard(
+    dados,
+    dadosConsulta
+) {
 
-    renderIndicator(dados);
+    renderIndicator(
+        dados,
+        dadosConsulta
+    );
 
     renderKPIs(dados);
 
@@ -148,123 +288,33 @@ function renderDashboard(dados) {
 
     renderFalsePositives(dados);
 
-    setupPulses(dados.pulses || []);
+    setupPulses(
+        dados.pulses || []
+    );
+
 }
 
-// ============================================================
-// RESUMO COM IA
-// ============================================================
-
-async function gerarResumoIA() {
-
-    // Verifica se existe uma consulta realizada
-    if (!resultadoConsulta) {
-
-        mensagem.textContent =
-            "Realize uma consulta antes de gerar o resumo com IA.";
-
-        return;
-    }
-
-
-    const button =
-        document.getElementById("btn-ai-summary");
-
-    const summary =
-        document.getElementById("ai-summary");
-
-    const content =
-        document.getElementById("ai-summary-content");
-
-
-    // --------------------------------------------------------
-    // Estado de carregamento
-    // --------------------------------------------------------
-
-    button.disabled = true;
-    button.textContent = "Gerando resumo...";
-
-    summary.style.display = "block";
-
-    content.textContent =
-        "A inteligência artificial está analisando os dados retornados pela Threat Intelligence...";
-
-
-    try {
-
-        // ----------------------------------------------------
-        // Envia o IndicatorResponse para o backend
-        // ----------------------------------------------------
-
-        const response = await fetch(
-            "/ai/summary",
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify(resultadoConsulta)
-            }
-        );
-
-
-        const dados = await response.json();
-
-
-        // ----------------------------------------------------
-        // Trata erros da API
-        // ----------------------------------------------------
-
-        if (!response.ok) {
-
-            content.textContent =
-                dados.detail ||
-                "Não foi possível gerar o resumo por IA.";
-
-            return;
-        }
-
-
-        // ----------------------------------------------------
-        // Exibe o resumo
-        // ----------------------------------------------------
-
-        content.textContent =
-            dados.resumo ||
-            "A IA não retornou um resumo.";
-
-    } catch (erro) {
-
-        console.error(
-            "Erro ao gerar resumo com IA:",
-            erro
-        );
-
-        content.textContent =
-            "Erro ao conectar com o serviço de inteligência artificial.";
-
-    } finally {
-
-        button.disabled = false;
-        button.textContent = "Gerar resumo com IA";
-
-    }
-}
 
 // ============================================================
 // INDICADOR
 // ============================================================
 
-function renderIndicator(dados) {
+function renderIndicator(
+    dados,
+    dadosConsulta
+) {
 
-    document.getElementById("indicator-value").textContent =
-        dados.indicador || "-";
+    document.getElementById(
+        "indicator-value"
+    ).textContent =
+        dadosConsulta?.indicador || "-";
 
 
-    document.getElementById("indicator-type").textContent =
-        dados.tipo || "-";
+    document.getElementById(
+        "indicator-type"
+    ).textContent =
+        dadosConsulta?.tipo || "-";
+
 }
 
 
@@ -274,20 +324,30 @@ function renderIndicator(dados) {
 
 function renderKPIs(dados) {
 
-    document.getElementById("reputacao").textContent =
+    document.getElementById(
+        "reputacao"
+    ).textContent =
         dados.reputacao ?? "-";
 
 
-    document.getElementById("quantidade-pulses").textContent =
-        dados.quantidade_pulses ?? 0;
+    document.getElementById(
+        "quantidade-pulses"
+    ).textContent =
+        dados.quantidade_pulses ??
+        (dados.pulses || []).length;
 
 
-    document.getElementById("quantidade-validation").textContent =
+    document.getElementById(
+        "quantidade-validation"
+    ).textContent =
         (dados.validation || []).length;
 
 
-    document.getElementById("quantidade-false-positive").textContent =
+    document.getElementById(
+        "quantidade-false-positive"
+    ).textContent =
         (dados.false_positive || []).length;
+
 }
 
 
@@ -298,16 +358,25 @@ function renderKPIs(dados) {
 function renderLocation(dados) {
 
     const container =
-        document.getElementById("localizacao");
+        document.getElementById(
+            "localizacao"
+        );
 
 
     const campos = [
+
         ["País", dados.pais],
+
         ["Código do país", dados.codigo_pais],
+
         ["Continente", dados.continente],
+
         ["Cidade", dados.cidade],
+
         ["Região", dados.regiao],
+
         ["Subdivisão", dados.subdivisao]
+
     ];
 
 
@@ -317,41 +386,53 @@ function renderLocation(dados) {
     let encontrouDados = false;
 
 
-    campos.forEach(([label, value]) => {
+    campos.forEach(
+        ([label, value]) => {
 
-        if (
-            value !== null &&
-            value !== undefined &&
-            value !== ""
-        ) {
+            if (
+                value !== null &&
+                value !== undefined &&
+                value !== ""
+            ) {
 
-            encontrouDados = true;
+                encontrouDados = true;
 
-            container.innerHTML += `
-                <div class="info-row">
 
-                    <span class="info-label">
-                        ${escapeHtml(label)}
-                    </span>
+                container.innerHTML += `
 
-                    <span class="info-value">
-                        ${escapeHtml(String(value))}
-                    </span>
+                    <div class="info-row">
 
-                </div>
-            `;
+                        <span class="info-label">
+                            ${escapeHtml(label)}
+                        </span>
+
+                        <span class="info-value">
+                            ${escapeHtml(
+                                String(value)
+                            )}
+                        </span>
+
+                    </div>
+
+                `;
+
+            }
+
         }
-
-    });
+    );
 
 
     if (!encontrouDados) {
 
         container.innerHTML =
-            `<div class="empty">
+            `
+            <div class="empty">
                 Nenhuma informação de localização disponível.
-            </div>`;
+            </div>
+            `;
+
     }
+
 }
 
 
@@ -362,56 +443,73 @@ function renderLocation(dados) {
 function renderInfrastructure(dados) {
 
     const container =
-        document.getElementById("infraestrutura");
+        document.getElementById(
+            "infraestrutura"
+        );
 
 
     container.innerHTML = "";
 
 
     const campos = [
+
         ["ASN", dados.asn],
+
         ["WHOIS", dados.whois]
+
     ];
 
 
     let encontrouDados = false;
 
 
-    campos.forEach(([label, value]) => {
+    campos.forEach(
+        ([label, value]) => {
 
-        if (
-            value !== null &&
-            value !== undefined &&
-            value !== ""
-        ) {
+            if (
+                value !== null &&
+                value !== undefined &&
+                value !== ""
+            ) {
 
-            encontrouDados = true;
+                encontrouDados = true;
 
-            container.innerHTML += `
-                <div class="info-row">
 
-                    <span class="info-label">
-                        ${escapeHtml(label)}
-                    </span>
+                container.innerHTML += `
 
-                    <span class="info-value">
-                        ${escapeHtml(String(value))}
-                    </span>
+                    <div class="info-row">
 
-                </div>
-            `;
+                        <span class="info-label">
+                            ${escapeHtml(label)}
+                        </span>
+
+                        <span class="info-value">
+                            ${escapeHtml(
+                                String(value)
+                            )}
+                        </span>
+
+                    </div>
+
+                `;
+
+            }
+
         }
-
-    });
+    );
 
 
     if (!encontrouDados) {
 
         container.innerHTML =
-            `<div class="empty">
+            `
+            <div class="empty">
                 Nenhuma informação de infraestrutura disponível.
-            </div>`;
+            </div>
+            `;
+
     }
+
 }
 
 
@@ -428,81 +526,77 @@ function renderThreatContext(dados) {
     renderCountries(dados);
 
     renderIndustries(dados);
+
 }
 
 
 // ============================================================
-// MALWARE FAMILIES
+// MALWARE
 // ============================================================
 
 function renderMalwareFamilies(dados) {
 
     const families =
         dados.pulses?.flatMap(
-            pulse => pulse.malware_families || []
+            pulse =>
+                pulse.malware_families || []
         ) || [];
 
 
     malwareFamilies = [];
 
 
-    families.forEach(family => {
+    families.forEach(
+        family => {
 
-        const exists =
-            malwareFamilies.some(
-                item => item.id === family.id
-            );
+            const exists =
+                malwareFamilies.some(
+                    item =>
+                        item.id === family.id
+                );
 
 
-        if (!exists) {
+            if (!exists) {
 
-            malwareFamilies.push(family);
+                malwareFamilies.push(
+                    family
+                );
+
+            }
 
         }
-
-    });
+    );
 
 
     malwareExibidos = 0;
 
 
-    const container =
-        document.getElementById("malware-families");
+    document.getElementById(
+        "malware-families"
+    ).innerHTML = "";
 
-    container.innerHTML = "";
 
-
-    document.getElementById("malware-count").textContent =
+    document.getElementById(
+        "malware-count"
+    ).textContent =
         malwareFamilies.length;
 
 
-    if (malwareFamilies.length === 0) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Nenhuma informação disponível.
-            </div>`;
-
-        document.getElementById(
-            "show-more-malware"
-        ).style.display = "none";
-
-        return;
-    }
-
-
     renderMoreMalware();
+
 }
 
 
 // ============================================================
-// MAIS MALWARE FAMILIES
+// MAIS MALWARE
 // ============================================================
 
 function renderMoreMalware() {
 
     const container =
-        document.getElementById("malware-families");
+        document.getElementById(
+            "malware-families"
+        );
 
 
     const inicio =
@@ -516,7 +610,11 @@ function renderMoreMalware() {
         );
 
 
-    for (let i = inicio; i < fim; i++) {
+    for (
+        let i = inicio;
+        i < fim;
+        i++
+    ) {
 
         const family =
             malwareFamilies[i];
@@ -537,7 +635,9 @@ function renderMoreMalware() {
                     family.target
                         ? `
                             <small>
-                                ${escapeHtml(family.target)}
+                                ${escapeHtml(
+                                    family.target
+                                )}
                             </small>
                           `
                         : ""
@@ -546,6 +646,7 @@ function renderMoreMalware() {
             </div>
 
         `;
+
     }
 
 
@@ -557,80 +658,77 @@ function renderMoreMalware() {
         malwareExibidos,
         malwareFamilies.length
     );
+
 }
 
 
 // ============================================================
-// MITRE ATT&CK
+// MITRE
 // ============================================================
 
 function renderAttackIds(dados) {
 
     const attacks =
         dados.pulses?.flatMap(
-            pulse => pulse.attack_ids || []
+            pulse =>
+                pulse.attack_ids || []
         ) || [];
 
 
     attackIds = [];
 
 
-    attacks.forEach(attack => {
+    attacks.forEach(
+        attack => {
 
-        const exists =
-            attackIds.some(
-                item => item.id === attack.id
-            );
+            const exists =
+                attackIds.some(
+                    item =>
+                        item.id === attack.id
+                );
 
 
-        if (!exists) {
+            if (!exists) {
 
-            attackIds.push(attack);
+                attackIds.push(
+                    attack
+                );
+
+            }
 
         }
-
-    });
+    );
 
 
     attacksExibidos = 0;
 
 
-    const container =
-        document.getElementById("attack-ids");
+    document.getElementById(
+        "attack-ids"
+    ).innerHTML = "";
 
-    container.innerHTML = "";
 
-
-    document.getElementById("attack-count").textContent =
+    document.getElementById(
+        "attack-count"
+    ).textContent =
         attackIds.length;
 
 
-    if (attackIds.length === 0) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Nenhuma informação disponível.
-            </div>`;
-
-        document.getElementById(
-            "show-more-attack"
-        ).style.display = "none";
-
-        return;
-    }
-
-
     renderMoreAttacks();
+
 }
 
+
 // ============================================================
-// MAIS MITRE ATT&CK
+// MAIS MITRE
 // ============================================================
 
 function renderMoreAttacks() {
 
     const container =
-        document.getElementById("attack-ids");
+        document.getElementById(
+            "attack-ids"
+        );
 
 
     const inicio =
@@ -644,7 +742,11 @@ function renderMoreAttacks() {
         );
 
 
-    for (let i = inicio; i < fim; i++) {
+    for (
+        let i = inicio;
+        i < fim;
+        i++
+    ) {
 
         const attack =
             attackIds[i];
@@ -668,7 +770,9 @@ function renderMoreAttacks() {
                         ? `
                             <small>
                                 ID:
-                                ${escapeHtml(attack.id)}
+                                ${escapeHtml(
+                                    attack.id
+                                )}
                             </small>
                           `
                         : ""
@@ -677,6 +781,7 @@ function renderMoreAttacks() {
             </div>
 
         `;
+
     }
 
 
@@ -688,18 +793,20 @@ function renderMoreAttacks() {
         attacksExibidos,
         attackIds.length
     );
+
 }
 
 
 // ============================================================
-// PAÍSES-ALVO
+// PAÍSES
 // ============================================================
 
 function renderCountries(dados) {
 
     const countries =
         dados.pulses?.flatMap(
-            pulse => pulse.targeted_countries || []
+            pulse =>
+                pulse.targeted_countries || []
         ) || [];
 
 
@@ -710,32 +817,19 @@ function renderCountries(dados) {
     countriesExibidos = 0;
 
 
-    const container =
-        document.getElementById("targeted-countries");
+    document.getElementById(
+        "targeted-countries"
+    ).innerHTML = "";
 
-    container.innerHTML = "";
 
-
-    document.getElementById("countries-count").textContent =
+    document.getElementById(
+        "countries-count"
+    ).textContent =
         targetedCountries.length;
 
 
-    if (targetedCountries.length === 0) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Nenhuma informação disponível.
-            </div>`;
-
-        document.getElementById(
-            "show-more-countries"
-        ).style.display = "none";
-
-        return;
-    }
-
-
     renderMoreCountries();
+
 }
 
 
@@ -746,7 +840,9 @@ function renderCountries(dados) {
 function renderMoreCountries() {
 
     const container =
-        document.getElementById("targeted-countries");
+        document.getElementById(
+            "targeted-countries"
+        );
 
 
     const inicio =
@@ -760,7 +856,11 @@ function renderMoreCountries() {
         );
 
 
-    for (let i = inicio; i < fim; i++) {
+    for (
+        let i = inicio;
+        i < fim;
+        i++
+    ) {
 
         const country =
             targetedCountries[i];
@@ -777,6 +877,7 @@ function renderMoreCountries() {
             </div>
 
         `;
+
     }
 
 
@@ -788,6 +889,7 @@ function renderMoreCountries() {
         countriesExibidos,
         targetedCountries.length
     );
+
 }
 
 
@@ -799,7 +901,8 @@ function renderIndustries(dados) {
 
     const industries =
         dados.pulses?.flatMap(
-            pulse => pulse.industries || []
+            pulse =>
+                pulse.industries || []
         ) || [];
 
 
@@ -810,32 +913,19 @@ function renderIndustries(dados) {
     industriesExibidos = 0;
 
 
-    const container =
-        document.getElementById("industries");
+    document.getElementById(
+        "industries"
+    ).innerHTML = "";
 
-    container.innerHTML = "";
 
-
-    document.getElementById("industries-count").textContent =
+    document.getElementById(
+        "industries-count"
+    ).textContent =
         industriesList.length;
 
 
-    if (industriesList.length === 0) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Nenhuma informação disponível.
-            </div>`;
-
-        document.getElementById(
-            "show-more-industries"
-        ).style.display = "none";
-
-        return;
-    }
-
-
     renderMoreIndustries();
+
 }
 
 
@@ -846,7 +936,9 @@ function renderIndustries(dados) {
 function renderMoreIndustries() {
 
     const container =
-        document.getElementById("industries");
+        document.getElementById(
+            "industries"
+        );
 
 
     const inicio =
@@ -860,7 +952,11 @@ function renderMoreIndustries() {
         );
 
 
-    for (let i = inicio; i < fim; i++) {
+    for (
+        let i = inicio;
+        i < fim;
+        i++
+    ) {
 
         const industry =
             industriesList[i];
@@ -877,6 +973,7 @@ function renderMoreIndustries() {
             </div>
 
         `;
+
     }
 
 
@@ -888,11 +985,12 @@ function renderMoreIndustries() {
         industriesExibidos,
         industriesList.length
     );
+
 }
 
 
 // ============================================================
-// CONTROLE DOS BOTÕES "VER MAIS"
+// BOTÕES DO CONTEXTO
 // ============================================================
 
 function updateThreatButton(
@@ -902,23 +1000,33 @@ function updateThreatButton(
 ) {
 
     const button =
-        document.getElementById(buttonId);
+        document.getElementById(
+            buttonId
+        );
 
 
     if (!button) {
+
         return;
+
     }
 
 
-    if (exibidos >= total) {
+    if (
+        total === 0 ||
+        exibidos >= total
+    ) {
 
-        button.style.display = "none";
+        button.style.display =
+            "none";
 
     } else {
 
-        button.style.display = "block";
+        button.style.display =
+            "block";
 
     }
+
 }
 
 
@@ -932,100 +1040,98 @@ function renderCharts(dados) {
         dados.pulses || [];
 
 
-    // ----------------------------------------
-    // MALWARE
-    // ----------------------------------------
-
-    const malware = countValues(
-        pulses.flatMap(
-            pulse =>
-                (pulse.malware_families || [])
-                    .map(
-                        malware =>
-                            malware.display_name ||
-                            malware.id
-                    )
-        )
-    );
+    const malware =
+        countValues(
+            pulses.flatMap(
+                pulse =>
+                    (pulse.malware_families || [])
+                        .map(
+                            malware =>
+                                malware.display_name ||
+                                malware.id
+                        )
+            )
+        );
 
 
-    // ----------------------------------------
-    // PAÍSES
-    // ----------------------------------------
-
-    const countries = countValues(
-        pulses.flatMap(
-            pulse =>
-                pulse.targeted_countries || []
-        )
-    );
+    const countries =
+        countValues(
+            pulses.flatMap(
+                pulse =>
+                    pulse.targeted_countries || []
+            )
+        );
 
 
-    // ----------------------------------------
-    // INDÚSTRIAS
-    // ----------------------------------------
-
-    const industries = countValues(
-        pulses.flatMap(
-            pulse =>
-                pulse.industries || []
-        )
-    );
+    const industries =
+        countValues(
+            pulses.flatMap(
+                pulse =>
+                    pulse.industries || []
+            )
+        );
 
 
-    // ----------------------------------------
-    // MITRE
-    // ----------------------------------------
-
-    const attacks = countValues(
-        pulses.flatMap(
-            pulse =>
-                (pulse.attack_ids || [])
-                    .map(
-                        attack =>
-                            attack.display_name ||
-                            attack.name ||
-                            attack.id
-                    )
-        )
-    );
+    const attacks =
+        countValues(
+            pulses.flatMap(
+                pulse =>
+                    (pulse.attack_ids || [])
+                        .map(
+                            attack =>
+                                attack.display_name ||
+                                attack.name ||
+                                attack.id
+                        )
+            )
+        );
 
 
-    malwareChart = createBarChart(
-        "malware-chart",
-        malwareChart,
-        malware
-    );
+    malwareChart =
+        createBarChart(
+            "malware-chart",
+            "malware-chart-empty",
+            malwareChart,
+            malware
+        );
 
 
-    countriesChart = createBarChart(
-        "countries-chart",
-        countriesChart,
-        countries
-    );
+    countriesChart =
+        createBarChart(
+            "countries-chart",
+            "countries-chart-empty",
+            countriesChart,
+            countries
+        );
 
 
-    industriesChart = createBarChart(
-        "industries-chart",
-        industriesChart,
-        industries
-    );
+    industriesChart =
+        createBarChart(
+            "industries-chart",
+            "industries-chart-empty",
+            industriesChart,
+            industries
+        );
 
 
-    attackChart = createBarChart(
-        "attack-chart",
-        attackChart,
-        attacks
-    );
+    attackChart =
+        createBarChart(
+            "attack-chart",
+            "attack-chart-empty",
+            attackChart,
+            attacks
+        );
+
 }
 
 
 // ============================================================
-// CRIAÇÃO DOS GRÁFICOS
+// CRIAÇÃO DO GRÁFICO
 // ============================================================
 
 function createBarChart(
     canvasId,
+    emptyId,
     existingChart,
     data
 ) {
@@ -1038,12 +1144,14 @@ function createBarChart(
 
 
     const canvas =
-        document.getElementById(canvasId);
+        document.getElementById(
+            canvasId
+        );
 
 
     const empty =
         document.getElementById(
-            `${canvasId}-empty`
+            emptyId
         );
 
 
@@ -1057,61 +1165,73 @@ function createBarChart(
 
     if (labels.length === 0) {
 
-        canvas.style.display = "none";
+        canvas.style.display =
+            "none";
 
-        empty.style.display = "flex";
+
+        empty.style.display =
+            "flex";
+
 
         return null;
+
     }
 
 
-    canvas.style.display = "block";
+    canvas.style.display =
+        "block";
 
-    empty.style.display = "none";
+
+    empty.style.display =
+        "none";
 
 
-    return new Chart(canvas, {
+    return new Chart(
+        canvas,
+        {
 
-        type: "bar",
+            type: "bar",
 
-        data: {
+            data: {
 
-            labels: labels,
+                labels: labels,
 
-            datasets: [
+                datasets: [
 
-                {
-                    data: values
-                }
+                    {
+                        data: values
+                    }
 
-            ]
-
-        },
-
-        options: {
-
-            responsive: true,
-
-            maintainAspectRatio: false,
-
-            indexAxis: "y",
-
-            plugins: {
-
-                legend: {
-                    display: false
-                }
+                ]
 
             },
 
-            scales: {
+            options: {
 
-                x: {
+                responsive: true,
 
-                    beginAtZero: true,
+                maintainAspectRatio: false,
 
-                    ticks: {
-                        precision: 0
+                indexAxis: "y",
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    }
+
+                },
+
+                scales: {
+
+                    x: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+                            precision: 0
+                        }
+
                     }
 
                 }
@@ -1119,12 +1239,13 @@ function createBarChart(
             }
 
         }
+    );
 
-    });
 }
 
+
 // ============================================================
-// CONTAGEM DOS DADOS
+// CONTAGEM
 // ============================================================
 
 function countValues(values) {
@@ -1132,17 +1253,21 @@ function countValues(values) {
     const result = {};
 
 
-    values.forEach(value => {
+    values.forEach(
+        value => {
 
-        if (!value) {
-            return;
+            if (!value) {
+
+                return;
+
+            }
+
+
+            result[value] =
+                (result[value] || 0) + 1;
+
         }
-
-
-        result[value] =
-            (result[value] || 0) + 1;
-
-    });
+    );
 
 
     return Object.fromEntries(
@@ -1154,6 +1279,7 @@ function countValues(values) {
             )
 
     );
+
 }
 
 
@@ -1164,7 +1290,9 @@ function countValues(values) {
 function renderValidations(dados) {
 
     const container =
-        document.getElementById("validation-list");
+        document.getElementById(
+            "validation-list"
+        );
 
 
     container.innerHTML = "";
@@ -1177,38 +1305,45 @@ function renderValidations(dados) {
     if (validations.length === 0) {
 
         container.innerHTML =
-            `<div class="empty">
+            `
+            <div class="empty">
                 Nenhuma validação encontrada.
-            </div>`;
+            </div>
+            `;
 
         return;
+
     }
 
 
-    validations.forEach(validation => {
+    validations.forEach(
+        validation => {
 
-        container.innerHTML += `
+            container.innerHTML += `
 
-            <div class="validation">
+                <div class="validation">
 
-                <strong>
-                    ${escapeHtml(
-                        validation.name ||
-                        "Validação"
-                    )}
-                </strong>
+                    <strong>
+                        ${escapeHtml(
+                            validation.name ||
+                            "Validação"
+                        )}
+                    </strong>
 
-                <span>
-                    ${escapeHtml(
-                        validation.message || ""
-                    )}
-                </span>
+                    <span>
+                        ${escapeHtml(
+                            validation.message ||
+                            ""
+                        )}
+                    </span>
 
-            </div>
+                </div>
 
-        `;
+            `;
 
-    });
+        }
+    );
+
 }
 
 
@@ -1231,49 +1366,57 @@ function renderFalsePositives(dados) {
         dados.false_positive || [];
 
 
-    if (falsePositives.length === 0) {
+    if (
+        falsePositives.length === 0
+    ) {
 
         container.innerHTML =
-            `<div class="empty">
+            `
+            <div class="empty">
                 Nenhuma avaliação de falso positivo encontrada.
-            </div>`;
+            </div>
+            `;
 
         return;
+
     }
 
 
-    falsePositives.forEach(item => {
+    falsePositives.forEach(
+        item => {
 
-        container.innerHTML += `
+            container.innerHTML += `
 
-            <div class="false-positive">
+                <div class="false-positive">
 
-                <strong>
-                    ${escapeHtml(
-                        item.assessment ||
-                        "Não informado"
-                    )}
-                </strong>
+                    <strong>
+                        ${escapeHtml(
+                            item.assessment ||
+                            "Não informado"
+                        )}
+                    </strong>
 
-                <div>
-                    Reportado:
-                    ${formatDate(
-                        item.report_date
-                    )}
+                    <div>
+                        Reportado:
+                        ${formatDate(
+                            item.report_date
+                        )}
+                    </div>
+
+                    <div>
+                        Avaliado:
+                        ${formatDate(
+                            item.assessment_date
+                        )}
+                    </div>
+
                 </div>
 
-                <div>
-                    Avaliado:
-                    ${formatDate(
-                        item.assessment_date
-                    )}
-                </div>
+            `;
 
-            </div>
+        }
+    );
 
-        `;
-
-    });
 }
 
 
@@ -1288,32 +1431,13 @@ function setupPulses(lista) {
     pulsesExibidos = 0;
 
 
-    const container =
-        document.getElementById("pulse-list");
-
-    container.innerHTML = "";
-
-
-    const button =
-        document.getElementById(
-            "show-more-pulses"
-        );
-
-
-    if (pulses.length === 0) {
-
-        container.innerHTML =
-            `<div class="empty-state">
-                Nenhuma informação disponível.
-            </div>`;
-
-        button.style.display = "none";
-
-        return;
-    }
+    document.getElementById(
+        "pulse-list"
+    ).innerHTML = "";
 
 
     renderMorePulses();
+
 }
 
 
@@ -1448,6 +1572,7 @@ function renderMorePulses() {
             </div>
 
         `;
+
     }
 
 
@@ -1465,22 +1590,27 @@ function renderMorePulses() {
         pulses.length
     ) {
 
-        button.style.display = "none";
+        button.style.display =
+            "none";
 
     } else {
 
-        button.style.display = "block";
+        button.style.display =
+            "block";
 
     }
+
 }
 
 
 // ============================================================
-// EVENTOS DOS BOTÕES
+// EVENTOS
 // ============================================================
 
 document
-    .getElementById("show-more-pulses")
+    .getElementById(
+        "show-more-pulses"
+    )
     .addEventListener(
         "click",
         renderMorePulses
@@ -1488,7 +1618,9 @@ document
 
 
 document
-    .getElementById("show-more-malware")
+    .getElementById(
+        "show-more-malware"
+    )
     .addEventListener(
         "click",
         renderMoreMalware
@@ -1496,7 +1628,9 @@ document
 
 
 document
-    .getElementById("show-more-attack")
+    .getElementById(
+        "show-more-attack"
+    )
     .addEventListener(
         "click",
         renderMoreAttacks
@@ -1504,7 +1638,9 @@ document
 
 
 document
-    .getElementById("show-more-countries")
+    .getElementById(
+        "show-more-countries"
+    )
     .addEventListener(
         "click",
         renderMoreCountries
@@ -1512,7 +1648,9 @@ document
 
 
 document
-    .getElementById("show-more-industries")
+    .getElementById(
+        "show-more-industries"
+    )
     .addEventListener(
         "click",
         renderMoreIndustries
@@ -1520,13 +1658,15 @@ document
 
 
 // ============================================================
-// FORMATAÇÃO DE DATA
+// DATA
 // ============================================================
 
 function formatDate(date) {
 
     if (!date) {
+
         return "-";
+
     }
 
 
@@ -1534,7 +1674,11 @@ function formatDate(date) {
         new Date(date);
 
 
-    if (isNaN(parsed.getTime())) {
+    if (
+        isNaN(
+            parsed.getTime()
+        )
+    ) {
 
         return date;
 
@@ -1544,6 +1688,7 @@ function formatDate(date) {
     return parsed.toLocaleString(
         "pt-BR"
     );
+
 }
 
 
@@ -1554,9 +1699,32 @@ function formatDate(date) {
 function escapeHtml(value) {
 
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
 }
+
+
+// ============================================================
+// INICIA
+// ============================================================
+
+carregarConsulta();

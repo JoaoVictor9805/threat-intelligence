@@ -54,8 +54,38 @@
         <div id="mensagem"></div>
 
     </div>
+    <br>
+    <button
+        id="btn-ai-summary"
+        class="ai-summary-button"
+        type="button"
+        onclick="gerarResumoIA()"
+        disabled
+    >
+        Gerar resumo com IA
+    </button>
 
+    <div
+        id="ai-summary"
+        class="ai-summary"
+        style="display: none;"
+    >
+        <div class="ai-summary-title">
+            Resumo da análise
+        </div>
 
+        <div
+            id="ai-summary-content"
+            class="ai-summary-content"
+        ></div>
+
+        <div class="ai-summary-disclaimer">
+            Esta análise é uma interpretação automatizada dos dados
+            retornados pela fonte de Threat Intelligence e não substitui
+            a análise de um profissional.
+        </div>
+    </div>
+    <br><br><br><br>
     <!-- =========================
          DASHBOARD
     ========================== -->
