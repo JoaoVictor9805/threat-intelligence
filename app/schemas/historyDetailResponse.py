@@ -13,6 +13,7 @@ class HistoryDetailResponse(BaseModel):
     tipo: str
     fonte: str
     dataConsulta: datetime
+    resumoIa: str | None = None
 
     # Resultado da análise realizada na época da consulta
     resultado: IndicatorResponse

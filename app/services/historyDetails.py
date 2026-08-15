@@ -29,5 +29,6 @@ def carregar_consulta_detalhada(
         tipo=consulta.tipo,
         fonte=consulta.fonte,
         dataConsulta=consulta.dataConsulta,
+        resumoIa=consulta.resumoIa,
         resultado=resultado
     )

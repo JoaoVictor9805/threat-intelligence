@@ -607,6 +607,9 @@ body {
     box-shadow:
         0 2px 6px rgba(31, 41, 55, 0.025),
         0 8px 22px rgba(31, 41, 55, 0.03);
+
+    min-width: 0;
+
 }
 
 .chart-card h3 {
@@ -907,4 +910,24 @@ body {
     font-size: 13px;
 
     text-align: center;
+}
+
+
+#ai-summary-details-content {
+    color: #40484f;
+    font-size: 14px;
+    line-height: 1.6;
+    white-space: pre-line;
+}
+
+.ai-summary-disclaimer {
+    margin-top: 16px;
+    padding-top: 12px;
+
+    border-top: 1px solid #edf0f2;
+
+    color: #8a939b;
+
+    font-size: 12px;
+    line-height: 1.5;
 }

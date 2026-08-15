@@ -1,5 +1,5 @@
 from fastapi import APIRouter       # nos permite criar um "grupo de rotas".
-from fastapi import HTTPException
+from fastapi import HTTPException, Response
 from pydantic import ValidationError
 from fastapi.responses import FileResponse
 from pathlib import Path
@@ -20,8 +20,8 @@ def pagina_indicators():
     return FileResponse(BASE_DIR / "templates" / "index.html")
 
 
-@router.get("/indicators/{indicator}")
-def receber_parametros(indicator: str):
+@router.get("/indicators/{indicator:path}")
+def receber_parametros(indicator: str, response: Response):
 
     try: 
         dados = IndicatorRequest(indicator=indicator)
@@ -46,11 +46,13 @@ def receber_parametros(indicator: str):
         db = SessionLocal()
 
         try:
-            salvar_consulta(
+            consulta = salvar_consulta(
             db,
             resultado
             )
-            
+
+            response.headers["X-Consulta-Id"] = str(consulta.id)
+
         finally:
             db.close()
 

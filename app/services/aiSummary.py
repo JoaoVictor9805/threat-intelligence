@@ -1,14 +1,18 @@
 import os
 import json
 
-from openai import OpenAI
-from dotenv import load_dotenv
+from google import genai
+from google.genai import types
+
+from dotenv import load_dotenv      # Carregar arquivo .env
 
 load_dotenv()
 
-
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY"),
+    http_options=types.HttpOptions(
+        timeout=10000  # 10000 ms = 10 segundos
+    )
 )
 
 
@@ -55,19 +59,17 @@ Se esses dados estiverem ausentes ou vazios, informe essa limitação.
 Se não houver dados suficientes para uma conclusão confiável,
 deixe isso explicitamente claro.
 
-Também deixe claro que a análise é uma interpretação automatizada
-dos dados retornados pela fonte de Threat Intelligence e não substitui
-a análise de um profissional.
+Não utilize símbolos de diagramação ".md" no seu resultado, trabalhe com formatações
+diretas que não dependam de conversão
 
 Dados da consulta:
 
 {json.dumps(dados, ensure_ascii=False, indent=2)}
 """
 
-    resposta = client.responses.create(
-        model="gpt-5-mini",
-        timeout=20.0,  # segundos
-        input=prompt  
+    resposta = client.models.generate_content(
+        model="gemini-flash-lite-latest",
+        contents=prompt
     )
 
-    return resposta.output_text
+    return resposta.text

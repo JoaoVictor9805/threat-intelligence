@@ -19,3 +19,6 @@ ON SCHEDULE EVERY 1 DAY
 DO
     DELETE FROM consulta
     WHERE dataConsulta < CURRENT_TIMESTAMP - INTERVAL 30 DAY;
+
+USE threat_intelligence;
+ALTER TABLE consulta ADD COLUMN resumo_ia TEXT NULL;

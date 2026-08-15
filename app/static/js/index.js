@@ -47,6 +47,7 @@ let industriesExibidos = 0;
 // ============================================================
 
 let resultadoConsulta = null;
+let consultaId = null;
 
 // ============================================================
 // FORMULÁRIO
@@ -79,7 +80,7 @@ form.addEventListener("submit", async function(event) {
 
 
         const dados = await response.json();
-
+        consultaId = response.headers.get("X-Consulta-Id");
 
         if (!response.ok) {
 
@@ -197,7 +198,7 @@ async function gerarResumoIA() {
         // ----------------------------------------------------
 
         const response = await fetch(
-            "/ai/summary",
+            `/ai/summary?consulta_id=${consultaId}`,
             {
                 method: "POST",
 

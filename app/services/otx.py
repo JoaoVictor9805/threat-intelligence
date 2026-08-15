@@ -1,6 +1,7 @@
 import os                           # O os é um módulo da biblioteca padrão do Python que permite interagir com funcionalidades do sistema operacional
 import httpx                        # É uma biblioteca Python para realizar requisições HTTP
 from dotenv import load_dotenv      # Carregar arquivo .env
+from urllib.parse import quote
 
 load_dotenv()
 
@@ -20,7 +21,8 @@ def consultar_indicador(tipo: str, indicator: str):
 
     tipo_otx = tipos_otx[tipo]
 
-    url = f"{otx_base_url}/indicators/{tipo_otx}/{indicator}/general"
+    indicator_codificado = quote(indicator, safe="")
+    url = f"{otx_base_url}/indicators/{tipo_otx}/{indicator_codificado}/general"
 
     headers = {
         "X-OTX-API-KEY": api_key                                            # é o nome do header que a OTX espera para autenticação.

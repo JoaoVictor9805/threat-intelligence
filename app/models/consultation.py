@@ -5,7 +5,7 @@ from datetime import datetime;
 from sqlalchemy import JSON;
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, func
+from sqlalchemy import String, func, Text
 
 class Base(DeclarativeBase): # Classe dentro do projeto que serve como intermediária; Aqui poderíamos alterar padrões para todos nossos models/classes específicas ao mesmo tempo 
     pass
@@ -43,4 +43,10 @@ class Consultation(Base):
     resultado: Mapped[dict] = mapped_column(
         JSON,
         nullable=False
+    )
+
+    resumoIa: Mapped[str | None] = mapped_column(
+        "resumo_ia",
+        Text,
+        nullable=True
     )

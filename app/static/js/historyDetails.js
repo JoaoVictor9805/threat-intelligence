@@ -274,6 +274,8 @@ function renderDashboard(
         dadosConsulta
     );
 
+    renderAiSummary(dadosConsulta);
+    
     renderKPIs(dados);
 
     renderLocation(dados);
@@ -1722,6 +1724,27 @@ function escapeHtml(value) {
 
 }
 
+// ============================================================
+// RESUMO COM IA
+// ============================================================
+
+function renderAiSummary(dadosConsulta) {
+
+    const section =
+        document.getElementById("ai-summary-section");
+
+    const content =
+        document.getElementById("ai-summary-details-content");
+
+    if (!dadosConsulta?.resumoIa) {
+
+        section.style.display = "none";
+        return;
+    }
+
+    content.textContent = dadosConsulta.resumoIa;
+    section.style.display = "block";
+}
 
 // ============================================================
 // INICIA

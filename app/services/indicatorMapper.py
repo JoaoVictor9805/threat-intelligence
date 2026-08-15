@@ -77,7 +77,7 @@ def transformar_resposta_otx(dados: dict) -> IndicatorResponse:
         # Reputação / ameaça
         # --------------------------------------------------------
 
-        reputacao=dados["reputation"],
+        reputacao=dados.get("reputation", 0),
 
         quantidade_pulses=
             dados.get(

@@ -24,7 +24,7 @@ def salvar_consulta(
 
 def identificar_tipo_banco(tipo: str) -> str:
 
-    if tipo in ("IPv4"):
+    if tipo == "IPv4":
         return "ip"
 
     if tipo in ("URL", "domain", "hostname", "url"):
@@ -34,3 +34,18 @@ def identificar_tipo_banco(tipo: str) -> str:
         return "hash"
 
     raise ValueError(f"Tipo de indicador não suportado: {tipo}")
+
+
+def salvar_resumo_ia(
+    db: Session,
+    consulta_id: int,
+    resumo: str
+):
+    consulta = db.get(Consultation, consulta_id)
+
+    if consulta is None:
+        raise ValueError(f"Consulta {consulta_id} não encontrada.")
+
+    consulta.resumoIa = resumo
+
+    db.commit()
