@@ -10,6 +10,7 @@ Aplicação web para consulta e análise de indicadores de ameaça (IPs, URLs e 
 
 - [Funcionalidades](#funcionalidades)
 - [Arquitetura e stack](#arquitetura-e-stack)
+- [Gerenciamento do projeto](#gerenciamento-do-projeto)
 - [Estrutura de pastas](#estrutura-de-pastas)
 - [Pré-requisitos](#pré-requisitos)
 - [Instalação e configuração](#instalação-e-configuração)
@@ -50,6 +51,20 @@ Aplicação web para consulta e análise de indicadores de ameaça (IPs, URLs e 
 | Servidor ASGI | [Uvicorn](https://www.uvicorn.org/) |
 
 A aplicação **não usa filas ou processamento em segundo plano** — cada requisição é tratada de forma síncrona, do recebimento até a resposta.
+
+---
+
+## Gerenciamento do projeto
+
+O desenvolvimento foi organizado em um quadro no **Trello**, dividido em 3 sprints:
+
+🔗 **[Acessar o quadro no Trello](https://trello.com/invite/b/6a7c7bfb4bed2bdfd145e139/ATTId57f7804c3c17b74077d33df045de4d181B95472/desafio-tecnico)**
+
+| Sprint | Escopo |
+|---|---|
+| **Sprint 1** | Consulta de indicadores — integração com a API OTX, validação de entrada, mapeamento da resposta e dashboard inicial |
+| **Sprint 2** | Histórico de consultas — listagem, persistência no banco de dados e tela de detalhes de cada consulta |
+| **Sprint 3** | Resumo com IA — integração com a API do Google Gemini e geração de briefing automático |
 
 ---
 
@@ -241,19 +256,19 @@ A aplicação sobe por padrão em `http://127.0.0.1:8000`.
 
 ### Fluxo 1 — Consultar indicador
 
-![Diagrama de sequência - Consultar indicador](diagramas%20de%20sequência/Fluxo%2001%20-%20Consultar%20indicador.png)
+![Diagrama de sequência - Consultar indicador](diagramas%20de%20sequência/Fluxo%2001%20-%20Consultar%20indicador.svg)
 
 ### Fluxo 2 — Gerar resumo com IA
 
-![Diagrama de sequência - Gerar resumo com IA](diagramas%20de%20sequência/Fluxo%2002%20-%20Gerar%20resumo%20com%20IA.png)
+![Diagrama de sequência - Gerar resumo com IA](diagramas%20de%20sequência/Fluxo%2002%20-%20Gerar%20resumo%20com%20IA.svg)
 
 ### Fluxo 3 — Histórico (listagem)
 
-![Diagrama de sequência - Histórico](diagramas%20de%20sequência/Fluxo%2003%20-%20Histórico%20.png)
+![Diagrama de sequência - Histórico](diagramas%20de%20sequência/Fluxo%2003%20-%20Histórico%20.svg)
 
 ### Fluxo 4 — Histórico → Detalhes da consulta
 
-![Diagrama de sequência - Detalhes do histórico](diagramas%20de%20sequência/Fluxo%2004%20-%20Detalhes%20do%20histórico.png)
+![Diagrama de sequência - Detalhes do histórico](diagramas%20de%20sequência/Fluxo%2004%20-%20Detalhes%20do%20histórico.svg)
 
 ### Fluxo 1 — Consultar indicador
 
