@@ -270,18 +270,6 @@ A aplicação sobe por padrão em `http://127.0.0.1:8000`.
 
 ![Diagrama de sequência - Detalhes do histórico](diagramas%20de%20sequência/Fluxo%2004%20-%20Detalhes%20do%20histórico.svg)
 
-### Fluxo 1 — Consultar indicador
-
-
-### Fluxo 2 — Gerar resumo com IA
-
-
-### Fluxo 3 — Histórico (listagem)
-
-
-### Fluxo 4 — Histórico → Detalhes da consulta
-
-
 ---
 
 ## Limitações conhecidas / próximos passos
