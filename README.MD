@@ -286,4 +286,3 @@ A aplicação sobe por padrão em `http://127.0.0.1:8000`.
 
 Este projeto foi desenvolvido com apoio de ferramentas de inteligência artificial. A geração inicial de código, estruturação das funcionalidades e documentação contou majoritariamente com o auxílio do **ChatGPT**. A revisão técnica mais aprofundada, identificação e correção de bugs, e refinamento da lógica do projeto foram realizados com apoio do **Claude AI (Anthropic)**.
 
-O uso dessas ferramentas serviu como suporte ao processo de desenvolvimento — todo o código foi revisado, testado e compreendido antes de ser incorporado ao projeto.
