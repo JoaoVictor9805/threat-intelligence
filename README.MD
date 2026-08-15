@@ -21,7 +21,7 @@ Aplicação web para consulta e análise de indicadores de ameaça (IPs, URLs e 
 - [Rotas da aplicação](#rotas-da-aplicação)
 - [Fluxos de funcionamento (diagramas)](#fluxos-de-funcionamento-diagramas)
 - [Limitações conhecidas / próximos passos](#limitações-conhecidas--próximos-passos)
-
+- [Aviso sobre o processo de desenvolvimento](#aviso-sobre-o-processo-de-desenvolvimento)
 ---
 
 ## Funcionalidades
@@ -279,3 +279,11 @@ A aplicação sobe por padrão em `http://127.0.0.1:8000`.
 - A tela de detalhes do histórico faz duas requisições ao backend (uma para a página, outra para os dados) — ambas acabam consultando o mesmo registro no banco; há espaço para simplificação.
 - Não existem testes automatizados no projeto até o momento.
 - A geração de resumo com IA depende de uma chave paga/gratuita do Google Gemini e está sujeita aos limites de uso da conta configurada.
+
+---
+
+## Aviso sobre o processo de desenvolvimento
+
+Este projeto foi desenvolvido com apoio de ferramentas de inteligência artificial. A geração inicial de código, estruturação das funcionalidades e documentação contou majoritariamente com o auxílio do **ChatGPT**. A revisão técnica mais aprofundada, identificação e correção de bugs, e refinamento da lógica do projeto foram realizados com apoio do **Claude AI (Anthropic)**.
+
+O uso dessas ferramentas serviu como suporte ao processo de desenvolvimento — todo o código foi revisado, testado e compreendido antes de ser incorporado ao projeto.
