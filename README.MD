@@ -18,6 +18,7 @@ Aplicação web para consulta e análise de indicadores de ameaça (IPs, URLs e 
 - [Variáveis de ambiente (.env)](#variáveis-de-ambiente-env)
 - [Executando o projeto](#executando-o-projeto)
 - [Como usar](#como-usar)
+- [Capturas de tela](#capturas-de-tela)
 - [Rotas da aplicação](#rotas-da-aplicação)
 - [Fluxos de funcionamento (diagramas)](#fluxos-de-funcionamento-diagramas)
 - [Limitações conhecidas / próximos passos](#limitações-conhecidas--próximos-passos)
@@ -234,6 +235,42 @@ A aplicação sobe por padrão em `http://127.0.0.1:8000`.
 5. Opcionalmente, clique em **Gerar resumo com IA** para obter um briefing em linguagem simples sobre o indicador consultado.
 6. Toda consulta bem-sucedida é salva automaticamente — acesse **Histórico** para revisitá-la depois.
 7. No histórico, clique em **Visualizar** para reabrir o dashboard completo daquela consulta (incluindo o resumo de IA, se ele tiver sido gerado no momento da consulta original).
+
+---
+
+## Capturas de tela
+
+### Consulta de indicador
+
+![Campo de pesquisa vazio](capturas%20de%20tela/PesquisaVazia.jpeg)
+
+### Dashboard de resultado
+
+![Dashboard - visão geral](capturas%20de%20tela/DashboardYoutube.jpeg)
+
+![Dashboard - KPIs](capturas%20de%20tela/DashboardYoutube2.jpeg)
+
+![Dashboard - localização e infraestrutura](capturas%20de%20tela/DashboardYoutube3.jpeg)
+
+![Dashboard - contexto de ameaça](capturas%20de%20tela/DashboardYoutube4.jpeg)
+
+![Dashboard - gráficos](capturas%20de%20tela/DashboardYoutube5.jpeg)
+
+![Dashboard - pulses](capturas%20de%20tela/DashboardYoutube6.jpeg)
+
+### Resumo gerado por IA
+
+![Resumo da análise gerado por IA](capturas%20de%20tela/ResumoDeIA.jpeg)
+
+### Histórico de consultas
+
+![Lista de consultas realizadas](capturas%20de%20tela/HistoricoConsultas.jpeg)
+
+### Detalhes de uma consulta do histórico
+
+![Dashboard de uma consulta salva no histórico](capturas%20de%20tela/DashboardHistorico.jpeg)
+
+![Resumo de IA salvo no histórico](capturas%20de%20tela/ResumoDeIAHistorico.jpeg)
 
 ---
 
